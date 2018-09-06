@@ -17,10 +17,11 @@
           <div class="clear">
             <button @click="showModal()">Add Box</button>
             <button @click="removeBox()">X</button>
+            <button @click="print()">Print</button>
           </div>
         </div>
         <div class="col-8">
-          <div class="clearfix" id="back" :style="'background-color:' + backColor + ';'">
+           <div class="clearfix" ref="printMe" id="back" :style="'background-color:' + backColor + ';'">
           <ul id="box">
             <li :class="box.style" v-for="box in boxes" :style="'width: calc(' + boxPercentage + '% - ' + (boxMargin*2) + 'px); padding-bottom: calc(' + boxPercentage + '% - ' + (boxMargin*2) + 'px); background-color:' + box.color +'; margin:' + boxMargin + 'px;'">
             </li>
@@ -29,6 +30,7 @@
         </div>
       </div>
     </div>
+    <img :src="output">
     <b-modal v-model="modalShow" @hidden="addBox()">
       <swatches v-model="colors" @change-color="onChange"></swatches>
     </b-modal>
@@ -50,6 +52,7 @@
     },
   data () {
     return {
+      output: null,
       modalShow: false,
       numberOfBoxes: {
           height: 10,
@@ -115,6 +118,20 @@
         },
         showModal () {
             this.modalShow = true;
+        },
+        print() {
+            self = this;
+            const el = this.$refs.printMe;
+            // add option type to get the image version
+            // if not provided the promise will return
+            // the canvas.
+            const options = {
+                type: 'dataURL'
+            }
+            this.$html2canvas(el, options).then(function(result){
+                self.output = result;
+            });
+
         }
     },
 
