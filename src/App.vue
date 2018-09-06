@@ -3,39 +3,54 @@
     <div class="container">
       <div class="row">
         <div class="col-4">
-          <b-alert show>MAKE</b-alert>
-          <input type="range" v-model="boxSize" min="10" max="250" /> {{ boxSize }} <br>
+          <b-alert show>BOX ART</b-alert>
           <input type="range" v-model="boxMargin" min="0" max="20" /> {{ boxMargin }} <br>
           <input type="range" v-model="numberOfBoxes.width" min="2" max="100" @change="draw"/> {{ numberOfBoxes.width }} <br>
           <input type="range" v-model="numberOfBoxes.height" min="2" max="100" @change="draw"/> {{ numberOfBoxes.height }} <br>
-          <swatches v-model="colors" @change-color="onChange"></swatches>
 
-          <button @click="addBox"> Add Box </button>
+          <div class="clear">
+          <ul id="boxcolors" class="clearfix">
+            <li v-for="boxColor in boxColors" :style="'background-color:' + boxColor +';'">
+            </li>
+          </ul>
+          </div>
+          <div class="clear">
+            <button @click="showModal()">Add Box</button>
+            <button @click="removeBox()">X</button>
+          </div>
         </div>
         <div class="col-8">
-          <b-alert show>ART</b-alert>
           <div class="clearfix" id="back" :style="'background-color:' + backColor + ';'">
           <ul id="box">
-            <li :class="box.style" v-for="box in boxes" :style="'width:' + boxSize + 'px; height:' + boxSize +'px; background-color:' + box.color +'; margin:' + boxMargin + 'px;'">
+            <li :class="box.style" v-for="box in boxes" :style="'width: calc(' + boxPercentage + '% - ' + (boxMargin*2) + 'px); padding-bottom: calc(' + boxPercentage + '% - ' + (boxMargin*2) + 'px); background-color:' + box.color +'; margin:' + boxMargin + 'px;'">
             </li>
           </ul>
           </div>
         </div>
       </div>
     </div>
+    <b-modal v-model="modalShow" @hidden="addBox()">
+      <swatches v-model="colors" @change-color="onChange"></swatches>
+    </b-modal>
   </div>
 </template>
 
+
+
 <script>
     import { Swatches } from 'vue-color'
+    import bModal from 'bootstrap-vue/es/components/modal/modal'
 
-export default {
+
+    export default {
   name: 'app',
     components: {
-        Swatches
+        Swatches,
+        'b-modal': bModal
     },
   data () {
     return {
+      modalShow: false,
       numberOfBoxes: {
           height: 10,
           width: 10
@@ -43,8 +58,8 @@ export default {
       colors: {
           hex: '#ffffff',
       },
-      boxColors:['black','white'],
-      boxSize: 40,
+      boxColors:['black','white','gray'],
+      boxPercentage: 10,
       backColor: '#ddd',
       boxMargin: '0',
       boxes: [
@@ -58,31 +73,48 @@ export default {
             this.$set(this.boxColors,this.boxColors.length,this.colors.hex);
             this.draw();
         },
-        removeBox(index){
-            this.boxes.splice(index,1); // why is this removing only the last row?
+        removeBox(){
+            if(this.boxColors.length == 1) {
+                this.boxColors = [];
+            } else {
+                this.boxColors.splice(-1,1); // why is this removing only the last row?
+
+            }
+            this.draw();
         },
         draw(){
             this.boxes = [];
+            if(this.boxColors.length == 0) {
+                return;
+            }
             for (let boxCount = 0; boxCount < (this.numberOfBoxes.width*this.numberOfBoxes.height); ) {
                 let boxStyle = 'box';
 
                 for (let i = 0; i < this.boxColors.length; i++) {
 
-                    if((boxCount % this.numberOfBoxes.width) == 0){
+                    if ((boxCount % this.numberOfBoxes.width) == 0) {
                         boxStyle = 'box clear';
                     } else {
                         boxStyle = 'box';
                     }
-                    this.boxes.push({color: this.boxColors[i], style:boxStyle});
+                    this.boxes.push({color: this.boxColors[i], style: boxStyle});
                     boxCount++
-                    if(boxCount == this.numberOfBoxes.width*this.numberOfBoxes.height) {
+                    if (boxCount == this.numberOfBoxes.width * this.numberOfBoxes.height) {
                         break;
                     }
                 }
+
             }
         },
         onChange (val) {
-            this.colors = val
+            this.colors = val;
+            this.hideModal();
+        },
+        hideModal () {
+            this.modalShow = false;
+        },
+        showModal () {
+            this.modalShow = true;
         }
     },
 
@@ -124,6 +156,16 @@ a {
   margin: 0;
   float:left;
 }
+#boxcolors {
+  li{
+    float: left;
+    display: inline-block;
+    margin: 0 10px;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #d1ecf1;
+  }
+}
 .clear {
   clear: both;
 }
@@ -134,6 +176,11 @@ a {
   visibility: hidden;
   line-height: 0;
   height: 0;
+
+}
+
+#back {
+  width:100%;
 }
 
 .clearfix {
@@ -148,4 +195,22 @@ html[xmlns] .clearfix {
   height: 1%;
 }
 
+h1 {
+  height: 120px;
+  line-height: 120px;
+  text-align: center;
+}
+.vc-chrome {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  z-index: 9;
+}
+.current-color {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: #000;
+  cursor: pointer;
+}
 </style>
