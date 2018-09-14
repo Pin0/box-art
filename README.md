@@ -2,6 +2,8 @@
 
 > ENB box-art
 
+[DEMO](https://pin0.github.io/box-art/)
+
 ## Build Setup
 
 ``` bash
