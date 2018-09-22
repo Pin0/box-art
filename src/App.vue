@@ -3,13 +3,10 @@
         <div class="container">
             <div class="row">
                 <div class="col-4">
-                    <b-alert show>BOX ART</b-alert>
-                    <input type="range" v-model="boxMargin" min="0" max="20" v-b-tooltip.hover title="Margin"/> {{
-                    boxMargin }} <br>
-                    <input type="range" v-model="numberOfBoxes.width" min="2" max="100" @change="draw" v-b-tooltip.hover
-                           title="Width"/> {{ numberOfBoxes.width }} <br>
-                    <input type="range" v-model="numberOfBoxes.height" min="2" max="100" @change="draw"
-                           v-b-tooltip.hover title="Height"/> {{ numberOfBoxes.height }} <br>
+                    <b-alert show>{{ title }}</b-alert>
+                    <input type="range" v-model="boxMargin" min="0" max="20" v-b-tooltip.hover title="Margin"/> {{ boxMargin }} <br>
+                    <input type="range" v-model="numberOfBoxes.width" min="2" max="100" @change="draw" v-b-tooltip.hover title="Width"/> {{ numberOfBoxes.width }} <br>
+                    <input type="range" v-model="numberOfBoxes.height" min="2" max="100" @change="draw" v-b-tooltip.hover title="Height"/> {{ numberOfBoxes.height }} <br>
 
                     <div class="clear">
                         <ul id="boxcolors" class="clearfix">
@@ -19,12 +16,16 @@
                         </ul>
                     </div>
                     <div class="clear">
+                        Background <div v-on:click="showBgColorModal()" class="pickbackground" :style="'background-color:' + backColor + ';'"></div>
+                    </div>
+
+                    <div class="clear">
                         <button @click="showColorModal()">Add Color</button>
-                        <button @click="print()">Print</button>
+                        <button @click="download()">Download</button>
                     </div>
                 </div>
                 <div class="col-8">
-                    <div class="clearfix" ref="printMe" id="back" :style="'background-color:' + backColor + ';padding: ' + boxMargin + 'px;'">
+                    <div class="clearfix" ref="downloadMe" id="back" :style="'background-color:' + backColor + ';padding: ' + boxMargin + 'px;'">
                         <ul id="box">
                             <li :class="box.style" v-for="box in boxes"
                                 :style="'width: calc(' + boxPercentage + '% - ' + (boxMargin*2) + 'px); padding-bottom: calc(' + boxPercentage + '% - ' + (boxMargin*2) + 'px); background-color:' + box.color +'; margin:' + boxMargin + 'px;'">
@@ -35,10 +36,13 @@
             </div>
         </div>
         <b-modal v-model="colorModalShow" title="Add color" ok-title="Add color" @ok="addBox()">
-            <swatches v-model="colors" @change-color="onChange"></swatches>
+            <swatches v-model="colors" @change-color="onChangeColor"></swatches>
         </b-modal>
-        <b-modal v-model="printModal" size="lg" title="Print" ok-only>
-            <img class="printimage" :src="output">
+        <b-modal v-model="downloadModal" size="lg" title="Download" ok-only>
+            <img class="downloadimage" :src="output">
+        </b-modal>
+        <b-modal v-model="backgroundColorModal" size="lg" title="Choose Background Color" ok-title="Set Background Color" @ok="setBgColor()">
+            <swatches v-model="bgcolors" @change-color="onChangeBgColor"></swatches>
         </b-modal>
     </div>
 </template>
@@ -48,7 +52,6 @@
     import {Swatches} from 'vue-color'
     import bModal from 'bootstrap-vue/es/components/modal/modal'
 
-
     export default {
         name: 'app',
         components: {
@@ -57,14 +60,19 @@
         },
         data() {
             return {
+                title: 'ENB BOX ART',
                 output: null,
                 colorModalShow: false,
-                printModal: false,
+                backgroundColorModal: false,
+                downloadModal: false,
                 numberOfBoxes: {
                     height: 10,
                     width: 10
                 },
                 colors: {
+                    hex: '#ffffff',
+                },
+                bgcolors: {
                     hex: '#ffffff',
                 },
                 boxColors: ['black', 'white', 'gray'],
@@ -115,9 +123,14 @@
 
                 }
             },
-            onChange(val) {
+            setBgColor() {
+                this.backColor = this.bgcolors.hex;
+            },
+            onChangeColor(val) {
                 this.colors = val;
-                this.hideModal();
+            },
+            onChangeBgColor(val) {
+                this.bgcolors = val;
             },
             hideColorModal() {
                 this.colorModalShow = false;
@@ -125,10 +138,13 @@
             showColorModal() {
                 this.colorModalShow = true;
             },
-            print() {
+            showBgColorModal() {
+                this.backgroundColorModal = true;
+            },
+            download() {
                 self = this;
-                this.printModal = true;
-                const el = this.$refs.printMe;
+                this.downloadModal = true;
+                const el = this.$refs.downloadMe;
                 // add option type to get the image version
                 // if not provided the promise will return
                 // the canvas.
@@ -190,6 +206,7 @@
             width: 20px;
             height: 20px;
             border: 1px solid #d1ecf1;
+            cursor: pointer;
 
             span {
                 font-weight: bold;
@@ -249,8 +266,14 @@
         background-color: #000;
         cursor: pointer;
     }
+    .pickbackground {
+        width: 20px;
+        height:20px;
+        display: inline-block;
+        cursor: pointer;
+    }
 
-    .printimage {
+    .downloadimage {
         width: 100%;
     }
 </style>
