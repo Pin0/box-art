@@ -1,12 +1,13 @@
 <template>
     <div id="app">
-        <div class="container">
+        <div class="container-fluid">
             <div class="row">
                 <div class="col-4">
-                    <b-alert show>{{ title }}</b-alert>
-                    <input type="range" v-model="boxMargin" min="0" max="20" v-b-tooltip.hover title="Margin"/> {{ boxMargin }} <br>
-                    <input type="range" v-model="numberOfBoxes.width" min="2" max="100" @change="draw" v-b-tooltip.hover title="Width"/> {{ numberOfBoxes.width }} <br>
-                    <input type="range" v-model="numberOfBoxes.height" min="2" max="100" @change="draw" v-b-tooltip.hover title="Height"/> {{ numberOfBoxes.height }} <br>
+                    <b-alert show> {{ title }} </b-alert>
+                    <setIntValue v-model="boxMargin" title="Margin" tooltip="Set the space between boxes"></setIntValue>
+                    <setIntValue v-model="numberOfBoxes.width" @update="draw()" title="Horizontal boxes" tooltip="Set the number of boxes horizontally"></setIntValue>
+                    <setIntValue v-model="numberOfBoxes.height" @update="draw()" title="Verical boxes" tooltip="Set the number of boxes verticaly"></setIntValue>
+
 
                     <div class="clear">
                         <ul id="boxcolors" class="clearfix">
@@ -51,12 +52,21 @@
 <script>
     import {Swatches} from 'vue-color'
     import bModal from 'bootstrap-vue/es/components/modal/modal'
+   // import { library } from '@fortawesome/fontawesome-svg-core'
+   // import { faCoffee } from '@fortawesome/free-solid-svg-icons'
+    import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+    //import setIntValue from 'setIntValue'
+
+    import setIntValue from './setIntValue.vue'
+
 
     export default {
         name: 'app',
         components: {
             Swatches,
-            'b-modal': bModal
+            'b-modal': bModal,
+            FontAwesomeIcon,
+            setIntValue
         },
         data() {
             return {
@@ -155,6 +165,15 @@
                     self.output = result;
                 });
 
+            },
+            decreaseBoxMargin() {
+                this.boxMargin--;
+                if(this.boxMargin <=0) {
+                    this.boxMargin = 0;
+                }
+            },
+            increaseBoxMargin() {
+                this.boxMargin++;
             }
         },
 
@@ -275,5 +294,14 @@
 
     .downloadimage {
         width: 100%;
+    }
+    .btn-circle {
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        padding: 6px 0;
+        font-size: 12px;
+        line-height: 1.428571429;
+        border-radius: 15px;
     }
 </style>
