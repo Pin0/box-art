@@ -8,7 +8,7 @@
                         <font-awesome-icon icon="minus"/>
                     </button>
                 </span>
-                <input type="text" :value="value" class="form-control input-number">
+                <input type="text" :value="value" v-on:input="parse($event.target.value)" class="form-control input-number">
                 <span class="input-group-btn">
                     <button type="button" @click="increase()" class="btn btn-success btn-number">
                         <font-awesome-icon icon="plus"/>
@@ -37,7 +37,7 @@
         },
         computed: {
             function () {
-                return this.value
+                return this.content
             }
         },
         methods: {
@@ -53,6 +53,10 @@
             increase() {
                 this.content++;
                 this.$emit('input', this.content)
+                this.$emit('update')
+            },
+            parse(v) {
+                this.$emit('input', v)
                 this.$emit('update')
             }
         }

@@ -10,10 +10,17 @@ import "babel-polyfill"
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { faMinus } from '@fortawesome/free-solid-svg-icons'
+import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faDownload } from '@fortawesome/free-solid-svg-icons'
+
+
 //import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 library.add(faPlus)
 library.add(faMinus)
+library.add(faTimes)
+library.add(faDownload)
+
 
 
 Vue.use(BootstrapVue);
