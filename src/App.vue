@@ -130,7 +130,6 @@
                 return 100 / this.numberOfBoxes.width;
             }
         },
-
         methods: {
             addColorBox() {
                 //is this the correct way, this works otherwise I got some __ob__ Observable

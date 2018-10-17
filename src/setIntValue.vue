@@ -8,7 +8,7 @@
                         <font-awesome-icon icon="minus"/>
                     </button>
                 </span>
-                <input type="text" :value="value" v-on:input="parse($event.target.value)" class="form-control input-number">
+                <input type="text" v-bind:value="value" v-on:input="updateParent($event.target.value)" class="form-control input-number">
                 <span class="input-group-btn">
                     <button type="button" @click="increase()" class="btn btn-success btn-number">
                         <font-awesome-icon icon="plus"/>
@@ -30,33 +30,29 @@
         components: {
             FontAwesomeIcon
         },
-        data () {
+        data: function () {
             return {
-                content: this.value
-            }
-        },
-        computed: {
-            function () {
-                return this.content
+                intValue: this.value
             }
         },
         methods: {
+            updateParent: function (value) {
+                this.intValue = value; //set intValue on update so value is passed correct to parent
+                this.$emit('input', this.intValue); //@todo why should we do this in every function? this is ugly...
+                this.$emit('update')
+            },
             decrease() {
-                this.content--;
-                if(this.content <=0) {
-                    this.content = 0;
+                this.intValue--;
+                if(this.intValue <=0) {
+                    this.intValue = 0;
                 }
-                this.$emit('input', this.content)
+                this.$emit('input', this.intValue)
                 this.$emit('update')
 
             },
-            increase() {
-                this.content++;
-                this.$emit('input', this.content)
-                this.$emit('update')
-            },
-            parse(v) {
-                this.$emit('input', v)
+            increase: function () {
+                this.intValue ++
+                this.$emit('input', this.intValue)
                 this.$emit('update')
             }
         }
