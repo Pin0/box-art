@@ -21,8 +21,6 @@ library.add(faMinus)
 library.add(faTimes)
 library.add(faDownload)
 
-
-
 Vue.use(BootstrapVue);
 Vue.use(VueHtml2Canvas);
 Vue.use(setIntValue);

@@ -4,10 +4,10 @@
             <div class="row">
                 <div class="col-4">
                     <b-alert show> {{ title }} </b-alert>
-                    <setIntValue v-model="boxMargin" title="Margin" tooltip="Set the space between boxes"></setIntValue>
-                    <setIntValue v-model="numberOfBoxes.width" @update="draw()" title="Horizontal boxes" tooltip="Set the number of boxes horizontally"></setIntValue>
-                    <setIntValue v-model="numberOfBoxes.height" @update="draw()" title="Verical boxes" tooltip="Set the number of boxes verticaly"></setIntValue>
-                    <setIntValue v-model="numberOfGradientColors" @update="draw()" title="Gradient colors" tooltip="Set the number of gradient colors"></setIntValue>
+                    <int-input v-model="boxMargin" title="Margin" tooltip="Set the space between boxes"></int-input>
+                    <int-input v-model="numberOfBoxes.width" @update="draw()" title="Horizontal boxes" tooltip="Set the number of boxes horizontally"></int-input>
+                    <int-input v-model="numberOfBoxes.height" @update="draw()" title="Verical boxes" tooltip="Set the number of boxes verticaly"></int-input>
+                    <int-input v-model="numberOfGradientColors" @update="draw()" title="Gradient colors" tooltip="Set the number of gradient colors"></int-input>
 
 
                     <div class="row">
@@ -15,7 +15,7 @@
                         <div class="col">
                             <ul id="boxcolors" class="clearfix">
                                 <li v-for="(boxColor,index) in boxColors" :style="'background-color:' + boxColor +';'" v-on:click="removeColorBox(index)">
-                                    <span><font-awesome-icon icon="times"/></span>
+                                    <span><fa-icon icon="times"/></span>
                                 </li>
                             </ul>
                         </div>
@@ -46,9 +46,10 @@
                     <div class="row tools">
                         <div class="col">
                             <button type="button" class="btn btn-success" @click="showColorModal()">Add color</button>
+                            <button type="button" class="btn btn-success" @click="addTransparentColor()">Add transparent</button>
                             <button type="button" class="btn btn-success" @click="showGradientColorModal()">Add gradient color</button>
                             <button type="button" class="btn btn-success" @click="gradient()">Set gradient</button>
-                            <button type="button" class="btn btn-success" @click="download()">Download <font-awesome-icon icon="download"/></button>
+                            <button type="button" class="btn btn-success" @click="download()">Download <fa-icon icon="download"/></button>
                         </div>
                     </div>
                 </div>
@@ -64,16 +65,16 @@
             </div>
         </div>
         <b-modal v-model="colorModalShow" size="lg" title="Add color" ok-title="Add color" @ok="addColorBox()">
-            <swatches v-model="colors" @change-color="onChangeColor"></swatches>
+            <color-picker v-model="colors" :palette="defaultColors" @change-color="onChangeColor"></color-picker>
         </b-modal>
         <b-modal v-model="downloadModal" size="lg" title="Download" ok-only>
             <img class="downloadimage" :src="output">
         </b-modal>
         <b-modal v-model="backgroundColorModal" size="lg" title="Choose Background Color" ok-title="Set Background Color" @ok="setBgColor()">
-            <swatches v-model="bgcolors" @change-color="onChangeBgColor"></swatches>
+            <color-picker v-model="bgcolors" :palette="defaultColors" @change-color="onChangeBgColor"></color-picker>
         </b-modal>
         <b-modal v-model="gradientColorModal" size="lg" title="Choose Gradient Color" ok-title="Set Gradient Color" @ok="addGradientColor()">
-            <swatches v-model="colors" @change-color="onChangeColor"></swatches>
+            <color-picker v-model="colors" :palette="defaultColors" @change-color="onChangeColor"></color-picker>
         </b-modal>
     </div>
 </template>
@@ -88,15 +89,41 @@
     //import setIntValue from 'setIntValue'
 
     import setIntValue from './setIntValue.vue'
+    import material from 'material-colors'
 
+
+    // var colorMap = [
+    //     'white', 'pink', 'purple', 'deepPurple',
+    //     'indigo', 'blue', 'lightBlue', 'cyan',
+    //     'teal', 'green', 'lightGreen', 'lime',
+    //     'yellow', 'amber', 'orange', 'deepOrange',
+    //     'brown', 'blueGrey', 'black'
+    // ]
+    // var colorLevel = ['900', '700', '500', '300', '100']
+    // var defaultColors = (() => {
+    //     var colors = []
+    //     colorMap.forEach((type) => {
+    //         var typeColor = []
+    //         if (type.toLowerCase() === 'black' || type.toLowerCase() === 'white') {
+    //             typeColor = typeColor.concat(['#000000', '#FFFFFF'])
+    //         } else {
+    //             colorLevel.forEach((level) => {
+    //                 const color = material[type][level]
+    //                 typeColor.push(color.toUpperCase())
+    //             })
+    //         }
+    //         colors.push(typeColor)
+    //     })
+    //     return colors
+    // })()
 
     export default {
         name: 'app',
         components: {
-            Swatches,
+            'color-picker':  Swatches,
             'b-modal': bModal,
-            FontAwesomeIcon,
-            setIntValue
+            'fa-icon': FontAwesomeIcon,
+            'int-input': setIntValue
         },
         data() {
             return {
@@ -116,13 +143,14 @@
                 bgcolors: {
                     hex: '#ffffff',
                 },
-                boxColors: ['#000000', '#FFFFFF', '#808080'],
-                gradientColors: ['#000000', '#FFFFFF'],
+                boxColors: ['RGBA(0,0,0,1)', 'RGBA(255,255,255,1)', '#808080'],
+                gradientColors: ['RGBA(0,0,0,1)', 'RGBA(255,255,255,1)'],
                 //  boxPercentage: 100,
                 backColor: '#ddd',
                 boxMargin: '5',
                 numberOfGradientColors: 10,
-                boxes: []
+                boxes: [],
+                defaultColors: []
             }
         },
         computed: {
@@ -132,8 +160,9 @@
         },
         methods: {
             addColorBox() {
+                var rgba = 'RGBA(' + this.colors.rgba.r + ',' + this.colors.rgba.g + ',' + this.colors.rgba.b + ',' + this.colors.rgba.a + ')';
                 //is this the correct way, this works otherwise I got some __ob__ Observable
-                this.$set(this.boxColors, this.boxColors.length, this.colors.hex);
+                this.$set(this.boxColors, this.boxColors.length, rgba);
                 this.draw();
             },
             addGradientColor() {
@@ -293,11 +322,43 @@
                     color += letters[Math.floor(Math.random() * 16)];
                 }
                 return color;
+            },
+            addTransparentColor()
+            {
+                this.boxColors.push('RGBA(0,0,0,0)');
+                this.draw();
             }
         },
 
         beforeMount() {
-            this.draw()
+            //overwrite default color of color picker to add grayscales and transparent color
+            var colorMap = [
+                    'red', 'pink', 'purple', 'deepPurple',
+                    'indigo', 'blue', 'lightBlue', 'cyan',
+                    'teal', 'green', 'lightGreen', 'lime',
+                    'yellow', 'amber', 'orange', 'deepOrange',
+                    'brown', 'blueGrey', 'black'
+                ]
+            var colorLevel = ['900', '700', '500', '300', '100']
+            this.defaultColors = (() => {
+                var colors = []
+                colorMap.forEach((type) => {
+                    var typeColor = []
+                    if (type.toLowerCase() === 'black' || type.toLowerCase() === 'white') {
+                        typeColor = typeColor.concat(['#000000','#323232', '#7F7F7F','#CCCCCC', '#FFFFFF'])
+                        //console.log(typeColor);
+                    } else {
+                        colorLevel.forEach((level) => {
+                            const color = material[type][level]
+                            typeColor.push(color.toUpperCase())
+                        })
+                    }
+                    colors.push(typeColor)
+                })
+
+                return colors
+            })();
+            this.draw();
         },
 
     }
@@ -376,6 +437,7 @@
 
     #back {
         width: 100%;
+        border-radius: .25rem;
     }
 
     .clearfix {
