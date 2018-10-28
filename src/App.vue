@@ -14,7 +14,15 @@
                         <div class="col text-left"><h5 v-b-tooltip.hover title="Click a color to remove it">Chosen colors</h5></div>
                         <div class="col">
                             <ul id="boxcolors" class="clearfix">
-                                <li v-for="(boxColor,index) in boxColors" :style="'background-color:' + boxColor +';'" v-on:click="removeColorBox(index)">
+                                <li v-for="(boxColor,index) in boxColors"
+                                    v-on:click="removeColorBox(index)"
+                                    v-bind:class="{
+                                        'colorbox': true,
+                                        'white': boxColor.toUpperCase() == 'RGBA(255,255,255,1)',
+                                        'trans': boxColor.toUpperCase() == 'RGBA(0,0,0,0)'
+                                        }"
+                                    :style="'background-color:' + boxColor +';'"
+                                >
                                     <span><fa-icon icon="times"/></span>
                                 </li>
                             </ul>
@@ -177,6 +185,7 @@
             },
             draw() {
                 this.boxes = [];
+                console.log(this.boxColors);
                 if (this.boxColors.length == 0) {
                     return;
                 }
@@ -412,12 +421,19 @@
            // height: 40px;
            // border: 1px solid #d1ecf1;
             cursor: pointer;
-
+            color: white;
             span {
                 font-weight: bold;
                 font-size: 1em;
-                color: white;
             }
+        }
+
+        .white, .trans {
+             color: black;
+        }
+        .trans {
+            background-image: url("assets/transparency10.png");
+            background-repeat: repeat;
         }
     }
 
