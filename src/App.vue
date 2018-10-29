@@ -431,7 +431,7 @@
              color: black;
         }
         .trans {
-            background-image: url("dist/transparency10.png");
+            background-image: url("assets/transparency10.png");
             background-repeat: repeat;
         }
     }
