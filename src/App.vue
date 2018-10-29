@@ -185,7 +185,6 @@
             },
             draw() {
                 this.boxes = [];
-                console.log(this.boxColors);
                 if (this.boxColors.length == 0) {
                     return;
                 }
@@ -432,7 +431,7 @@
              color: black;
         }
         .trans {
-            background-image: url("assets/transparency10.png");
+            background-image: url("dist/transparency10.png");
             background-repeat: repeat;
         }
     }
