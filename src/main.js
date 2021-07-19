@@ -24,7 +24,7 @@ library.add(faDownload)
 Vue.use(BootstrapVue);
 Vue.use(VueHtml2Canvas);
 Vue.use(setIntValue);
-new Vue({
+var vmBoxArt = new Vue({
   el: '#app',
   render: h => h(App)
 })

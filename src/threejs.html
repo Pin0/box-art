@@ -1,0 +1,192 @@
+<html>
+<head>
+    <title>BOXART 3D</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+</head>
+<body>
+<script src="three.js"></script>
+<script src="OrbitControls.js"></script>
+
+</body>
+<script>
+
+
+    var debug = false;
+    // PerspectiveCamera( fov : Number, aspect : Number, near : Number, far : Number )
+    // fov — Camera frustum vertical field of view.
+    //     aspect — Camera frustum aspect ratio.
+    //     near — Camera frustum near plane.
+    //     far — Camera frustum far plane.
+    var camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 100 );
+    //move camera back a little
+    camera.position.z = 25;
+    camera.position.x = 15;
+    camera.position.y = 5;
+
+    var renderer = new THREE.WebGLRenderer({'antialias':true});
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+
+
+    document.body.appendChild( renderer.domElement );
+
+    // renderer.shadowMap.enabled = true;
+   // renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    //controls to view and zoom painting
+    var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+    orbit.enableZoom = true;
+    //orbit.enableZoom = false;
+    //orbit.enableRotate = false;
+
+    orbit.minDistance = 1;
+    orbit.maxDistance = 100;
+    //orbit.minPolarAngle = 0.3; // radians
+    //orbit.maxPolarAngle = -0.3;
+    //orbit.maxPolarAngle = Math.PI; // radians
+    //orbit.maxPolarAngle = (Math.PI/2) + 1;
+
+    var scene = new THREE.Scene();
+
+    if(debug) {
+        scene.add( new THREE.AxesHelper( 10 ) );
+    }
+
+    //white background
+    scene.background = new THREE.Color(0xffffff);
+    scene.add( new THREE.AmbientLight( 0xffffff , 1.9) );
+
+
+    //add endless floor
+    var geometry = new THREE.PlaneBufferGeometry( 1000, 1000, 100, 100 );
+    var material = new THREE.MeshStandardMaterial( {color: 0xfafafa, } );// side: THREE.DoubleSide} );
+
+    //var material = new THREE.MeshPhongMaterial( { color: 0xff0000, wireframe: true } );
+    var floor = new THREE.Mesh( geometry, material );
+    floor.rotation.x -= Math.PI/2;
+    floor.position.y -= 5;
+    floor.receiveShadow = true;
+    scene.add( floor );
+
+    var light = new THREE.DirectionalLight(0xffffff);
+    light.position.set(-10,55,25);
+    light.target.position.set(0,0,0);
+    light.shadow.camera.near = 0.1;
+    light.shadow.camera.far = 1000;
+    light.shadow.camera.left = -15;
+    light.shadow.camera.bottom = -15;
+    light.shadow.camera.right = 15;
+    light.shadow.camera.top	= 15;
+    light.castShadow = true;
+    light.shadow.mapSize.width = 2048;
+    light.shadow.mapSize.height = 2048;
+
+    scene.add(light);
+
+    if(debug) {
+        var helper = new THREE.CameraHelper( light.shadow.camera );
+        scene.add( helper );
+    }
+
+    //generate painting as group
+    var painting = new THREE.Group();
+    painting.castShadow = true;
+    painting.receiveShadow = false;
+
+    //painitng properties
+    var margin = 0.3;
+    var boxNumbers = THREE.Math.randInt(1,16);
+    var canvasWidth = boxNumbers + (margin*boxNumbers)+margin;
+    //units to move the canvas in order to set it exactly as background for all the smaller boxes
+    var canvasPosMove = ((1+margin)/2)*(boxNumbers-1);
+
+    //the actual canvas of the painting
+    // var canvas = new THREE.Mesh( new THREE.BoxGeometry( canvasWidth, canvasWidth, 0.5 ), new THREE.MeshPhongMaterial( { color: Math.random() * 0xffffff, wireframe: false } ) );
+    // canvas.position.x += canvasPosMove;
+    // canvas.position.y += canvasPosMove;
+    // canvas.position.z -= 0.25;
+    // canvas.castShadow = true;
+    // canvas.receiveShadow = true;
+
+
+    var loader = new THREE.TextureLoader();
+    loader.load('assets/white-canvas-texture.jpg', function ( texture ) {
+        // var geometry = new THREE.SphereGeometry(2, 2, 2);
+        // var material = new THREE.MeshBasicMaterial({map: texture});
+        // var mesh = new THREE.Mesh(geometry, material);
+        // scene.add(mesh);
+
+        // texture.wrapS = THREE.RepeatWrapping;
+        // texture.wrapT = THREE.RepeatWrapping;
+        // texture.repeat.set( 4, 4 );
+
+        var canvas = new THREE.Mesh( new THREE.BoxGeometry( canvasWidth, canvasWidth, 0.5 ), new THREE.MeshBasicMaterial({map: texture, color: Math.random() * 0xffffff}) );
+        canvas.position.x += canvasPosMove;
+        canvas.position.y += canvasPosMove;
+        canvas.position.z -= 0.25;
+        canvas.castShadow = true;
+        canvas.receiveShadow = true;
+        painting.add( canvas );
+    });
+
+
+
+    //add all individual boxes bases on params
+    for(var x = 0; x < boxNumbers; x++ ) {
+        for(var y = 0; y < boxNumbers; y++ ) {
+            //var grayness = Math.random() * 0.5 + 0.25;
+            var cube = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 0.2 ), mat = new THREE.MeshBasicMaterial() );
+            //mat.color.setRGB( grayness, grayness, grayness );
+            mat.color.setHex(Math.random() * 0xffffff);
+            cube.position.x = x+(margin*x);
+            cube.position.y = y+(margin*y);
+            cube.castShadow = true;
+            painting.add ( cube );
+           // scene.add( cube );
+        }
+
+    }
+    // white spotlight shining from the side, casting a shadow
+    //
+    // var spotLight = new THREE.SpotLight( 0xffffff );
+    // spotLight.position.set( 10, 20, 10 );
+    //
+    // spotLight.castShadow = true;
+    //
+    // spotLight.shadow.mapSize.width = 1024;
+    // spotLight.shadow.mapSize.height = 1024;
+    //
+    // spotLight.shadow.camera.near = 500;
+    // spotLight.shadow.camera.far = 4000;
+    // spotLight.shadow.camera.fov = 30;
+    //
+    // scene.add( spotLight );
+    //
+    // lightHelper = new THREE.SpotLightHelper( spotLight );
+    // scene.add( lightHelper );
+
+
+    //ad the entire painting to the scene
+    scene.add( painting );
+
+
+
+    var animate = function () {
+        requestAnimationFrame( animate );
+
+        //painting.rotation.x += 0.01;
+        //painting.rotation.y += 0.01;
+        //camera.lookAt(scene.position);
+
+        renderer.render( scene, camera );
+    };
+
+    animate();
+</script>
+</html>
